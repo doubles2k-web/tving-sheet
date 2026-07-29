@@ -353,15 +353,14 @@ html, body {
       let left, topPx;
 
       if (h) {
-        // 가로에 자리가 있는 경우: 트리거 끝에서 8px 띄우고(가로만 간격),
-        // 세로는 간격 없이 트리거 위치에 맞춰 정렬한 뒤 남는 방향으로 자람
+        // 가로에 자리가 있는 경우: 트리거 끝에서 8px 띄움 (가로/세로 모두 8px 간격)
         left = h === 'right' ? x + GAP : x - GAP - SHEET_W;
         left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
 
         if (v === 'down') {
-          topPx = Math.max(MARGIN, Math.min(y, FRAME_H - MARGIN - height));
+          topPx = Math.max(MARGIN, Math.min(y + GAP, FRAME_H - MARGIN - height));
         } else {
-          topPx = Math.min(Math.max(y - height, MARGIN), FRAME_H - MARGIN - height);
+          topPx = Math.min(Math.max(y - GAP - height, MARGIN), FRAME_H - MARGIN - height);
         }
       } else {
         // 2순위 fallback: 가로 양쪽 다 자리가 없을 때만 세로로 쌓임
