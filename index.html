@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=880, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=390, initial-scale=1.0, viewport-fit=cover">
 <title>TVING 자막 시트 프로토타입 (Phone)</title>
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
@@ -14,31 +14,13 @@ html, body {
   background: #000;
 }
 
-body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 100px;
-}
-
-.row-break {
-  flex-basis: 100%;
-  height: 0;
-}
-
 .player {
   position: relative;
   width: 390px;
   height: 844px;
-  flex-shrink: 0;
   font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif;
   overflow: hidden;
   user-select: none;
-}
-
-/* depth2 예시 프레임: 모서리 40px 라운드 (Figma rounded-40 프레임) */
-.player.player--rounded {
-  border-radius: 40px;
 }
 
 /* ─── BACKGROUND ─── */
@@ -50,24 +32,9 @@ body {
   display: block;
 }
 
-/* ─── 클릭 트리거 영역 (자막 아이콘, 실측 bbox 355~372 x 785~798) ─── */
-.cc-trigger {
-  position: absolute;
-  top: 772px;
-  left: 340px;
-  width: 42px;
-  height: 38px;
-  cursor: pointer;
-  z-index: 10;
-  background: rgba(255, 0, 0, 0.4);
-}
-
-/* ─── DROP SHEET (하단·좌측 고정, 높이만 depth에 따라 변화) ─── */
+/* ─── DROP SHEET (기존 카드: 뒤로 밀릴 때 축소 + dim) ─── */
 .sheet {
   position: absolute;
-  left: 86px;
-  bottom: 42px;
-  width: 260px;
   background: #27272E;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
@@ -75,15 +42,13 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: 300;
-  /* 닫힘: 자막 아이콘과 가까운 우측 하단 모서리로 수렴 */
-  clip-path: inset(100% 0% 0% 100% round 20px);
   transition:
     height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     clip-path 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sheet.no-transition { transition: none !important; }
+.no-transition { transition: none !important; }
 
 .sheet.open {
   opacity: 1;
@@ -93,19 +58,11 @@ body {
 
 .sheet-view {
   position: absolute;
-  top: 0; left: 0; width: 100%;
+  top: 0;
+  width: 100%;
   /* Drop Sheet 자체의 상하 12px 여백 (헤더 유무와 무관하게 적용) */
   padding: 12px 0;
   opacity: 1;
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.sheet-view.hidden {
-  display: none;
-}
-
-.sheet-view.fading {
-  opacity: 0;
 }
 
 /* ─── HEADER ─── */
@@ -130,21 +87,6 @@ body {
   white-space: nowrap;
 }
 
-.sheet-action-btn {
-  background: none;
-  border: none;
-  color: #14D8FF;
-  font-size: 15px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  padding: 6px 0;
-  transition: opacity 0.15s;
-}
-
-.sheet-action-btn:active { opacity: 0.6; }
-
 .back-btn {
   background: none;
   border: none;
@@ -161,7 +103,7 @@ body {
 
 .back-btn:active { opacity: 0.6; }
 
-/* ─── LIST (depth1) ─── */
+/* ─── LIST ─── */
 /* 상하 12px 여백은 .sheet-view/.stack-top이 담당. 각 Item/Content wrapper(px-4/py-2) +
    BaseListItem(px-16/py-12)을 합치면 세로 14px(2+12)/가로 20px(4+16) */
 .sheet-list {
@@ -187,34 +129,17 @@ body {
   line-height: 1.5;
 }
 
-.list-item.selected .item-label {
-  font-weight: 600;
-}
-
-.item-check {
-  width: 24px; height: 24px;
+.item-arrow {
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s;
+  opacity: 0.8;
 }
 
-.list-item.selected .item-check { opacity: 1; }
-
-/* ─── BODY (depth2) ─── */
-.sheet-body {
-  padding: 8px 20px 24px;
-}
-
-.sheet-desc {
-  font-size: 16px;
-  color: #b3b3b3;
-  line-height: 1.5;
-}
-
-.clr-blue { color: #14D8FF; }
-
-/* ─── STACK 인터랙션 (3번째 예시): 기존 카드가 축소+dim 되며 뒤로 밀리고, 새 카드가 위에 겹쳐서 나타남 ─── */
+/* ─── STACK 인터랙션: 기존 카드가 축소+dim 되며 뒤로 밀리고, 새 카드가 위에 겹쳐서 나타남 ─── */
 .stack-base {
+  left: auto;
+  bottom: auto;
   transform-origin: bottom right;
   transition:
     height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
@@ -247,10 +172,10 @@ body {
 
 .stack-top {
   position: absolute;
-  left: 86px;
-  bottom: 350px;
+  left: auto;
+  bottom: auto;
   width: 260px;
-  height: 185px;
+  height: auto;
   background: #27272E;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
@@ -258,8 +183,8 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: 310;
-  transform-origin: bottom right;
-  transform: translateY(16px) scale(0.96);
+  /* Drop Sheet 자체의 상하 12px 여백 */
+  padding: 12px 0;
   transition:
     opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
@@ -268,16 +193,9 @@ body {
 .stack-top.show {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
 }
 
-/* ─── PLAYGROUND (4번째 예시): 클릭한 지점을 트리거로 인식, Flip 로직을 실시간 계산 ─── */
-.player--playground .sheet {
-  /* 위치는 클릭 시점에 JS가 top/left/height/clip-path를 모두 인라인으로 계산해서 넣음 */
-  left: auto;
-  bottom: auto;
-}
-
+/* ─── PLAYGROUND: 클릭한 지점을 트리거로 인식, Flip 로직을 실시간 계산 ─── */
 .playground-hint {
   position: absolute;
   inset: 0;
@@ -316,389 +234,18 @@ body {
   opacity: 1;
 }
 
-/* ─── MENU + PLAYGROUND (5번째 예시): 클릭한 아이템 기준으로 위치/방향까지 전부 동적 계산 ─── */
-.no-transition { transition: none !important; }
-
-.player--menu-stack .stack-top {
-  left: auto;
-  bottom: auto;
-  width: 260px;
-  height: auto;
-  /* Drop Sheet 자체의 상하 12px 여백 (player3의 고정 185px 카드는 건드리지 않기 위해 여기만 스코프) */
-  padding: 12px 0;
-}
-
-/* ─── MENU CLIP (7번째 예시): top 정렬 유지, Safe Area에 닿으면 카드 높이만큼만 노출(잘림, 스크롤 없음) ─── */
-/* .stack-top 기본 overflow:hidden이 JS가 계산한 높이만큼만 보여주고 나머지는 그냥 잘라줌 */
-
-.item-arrow {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  opacity: 0.8;
-}
-
 </style>
 </head>
 <body>
 
 <!-- ══════════════════════════════════════════ -->
-<!-- PLAYER 1: 자막 언어 / 자막 설정            -->
+<!-- 메뉴 리스트 + 플레이그라운드 (top 정렬 우선, Safe Area에 닿으면 카드 전체를 밀어올림) -->
 <!-- ══════════════════════════════════════════ -->
 <div class="player">
 
   <img class="player-bg-img" src="Img/player-bg.png" alt="">
 
-  <div class="cc-trigger"></div>
-
-  <div class="sheet">
-
-    <div class="sheet-view">
-      <div class="sheet-hd">
-        <span class="sheet-title">자막 언어</span>
-        <button class="sheet-action-btn js-open-settings">자막 설정</button>
-      </div>
-      <div class="sheet-list">
-        <div class="list-item selected" data-val="none">
-          <span class="item-label">사용안함</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ko">
-          <span class="item-label">한국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="en">
-          <span class="item-label">영어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ja">
-          <span class="item-label">일본어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="gl">
-          <span class="item-label">가르시아어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-cn">
-          <span class="item-label">중국어 (간체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-tw">
-          <span class="item-label">중국어 (번체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="vi">
-          <span class="item-label">베트남어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="th">
-          <span class="item-label">태국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="sheet-view hidden">
-      <div class="sheet-hd">
-        <button class="back-btn js-back" aria-label="뒤로가기">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 5l-7 7 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <span class="sheet-title">자막 설정</span>
-      </div>
-      <div class="sheet-body">
-        <p class="sheet-desc">
-          iOS 기기에서는
-          <span class="clr-blue">설정 &gt; 손쉬운 사용 &gt; 자막 및 청각 장애인용 자막 &gt; 스타일 메뉴</span>에서
-          자막 설정을 변경하실 수 있습니다.
-        </p>
-      </div>
-    </div>
-
-  </div>
-
-</div><!-- .player -->
-
-<!-- ══════════════════════════════════════════ -->
-<!-- PLAYER 2: 동일 인터랙션 (라운드 프레임)     -->
-<!-- ══════════════════════════════════════════ -->
-<div class="player player--rounded player--fixed-height">
-
-  <img class="player-bg-img" src="Img/player-bg.png" alt="">
-
-  <div class="cc-trigger"></div>
-
-  <div class="sheet">
-
-    <div class="sheet-view">
-      <div class="sheet-hd">
-        <span class="sheet-title">자막 언어</span>
-        <button class="sheet-action-btn js-open-settings">자막 설정</button>
-      </div>
-      <div class="sheet-list">
-        <div class="list-item selected" data-val="none">
-          <span class="item-label">사용안함</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ko">
-          <span class="item-label">한국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="en">
-          <span class="item-label">영어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ja">
-          <span class="item-label">일본어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="gl">
-          <span class="item-label">가르시아어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-cn">
-          <span class="item-label">중국어 (간체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-tw">
-          <span class="item-label">중국어 (번체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="vi">
-          <span class="item-label">베트남어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="th">
-          <span class="item-label">태국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="sheet-view hidden">
-      <div class="sheet-hd">
-        <button class="back-btn js-back" aria-label="뒤로가기">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 5l-7 7 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <span class="sheet-title">자막 설정</span>
-      </div>
-      <div class="sheet-body">
-        <p class="sheet-desc">
-          iOS 기기에서는
-          <span class="clr-blue">설정 &gt; 손쉬운 사용 &gt; 자막 및 청각 장애인용 자막 &gt; 스타일 메뉴</span>에서
-          자막 설정을 변경하실 수 있습니다.
-        </p>
-      </div>
-    </div>
-
-  </div>
-
-</div><!-- .player -->
-
-<!-- ══════════════════════════════════════════ -->
-<!-- PLAYER 3: 스택형 인터랙션 (카드가 축소+dim되며 뒤로 밀림) -->
-<!-- ══════════════════════════════════════════ -->
-<div class="player player--rounded player--stack">
-
-  <img class="player-bg-img" src="Img/player-bg.png" alt="">
-
-  <div class="cc-trigger"></div>
-
-  <!-- 기존 카드: 뒤로 밀릴 때 축소 + dim -->
-  <div class="sheet stack-base">
-    <div class="sheet-view">
-      <div class="sheet-hd">
-        <span class="sheet-title">자막 언어</span>
-        <button class="sheet-action-btn js-open-settings">자막 설정</button>
-      </div>
-      <div class="sheet-list">
-        <div class="list-item selected" data-val="none">
-          <span class="item-label">사용안함</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ko">
-          <span class="item-label">한국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="en">
-          <span class="item-label">영어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="ja">
-          <span class="item-label">일본어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="gl">
-          <span class="item-label">가르시아어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-cn">
-          <span class="item-label">중국어 (간체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="zh-tw">
-          <span class="item-label">중국어 (번체)</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="vi">
-          <span class="item-label">베트남어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="th">
-          <span class="item-label">태국어</span>
-          <svg class="item-check" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12l5 5L19 7" stroke="#14D8FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-    <div class="stack-dim"></div>
-  </div>
-
-  <!-- 새 카드: 자막 설정, 위에 겹쳐서 나타남 -->
-  <div class="stack-top">
-    <div class="sheet-hd">
-      <button class="back-btn js-back" aria-label="뒤로가기">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M15 5l-7 7 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <span class="sheet-title">자막 설정</span>
-    </div>
-    <div class="sheet-body">
-      <p class="sheet-desc">
-        iOS 기기에서는
-        <span class="clr-blue">설정 &gt; 손쉬운 사용 &gt; 자막 및 청각 장애인용 자막 &gt; 스타일 메뉴</span>에서
-        자막 설정을 변경하실 수 있습니다.
-      </p>
-    </div>
-  </div>
-
-</div><!-- .player -->
-
-<div class="row-break"></div>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- PLAYER 4: 메뉴 리스트 + 플레이그라운드 (depth2가 depth1보다 훨씬 긴 케이스) -->
-<!-- ══════════════════════════════════════════ -->
-<div class="player player--playground player--menu-stack">
-
-  <img class="player-bg-img" src="Img/player-bg.png" alt="">
-
-  <div class="playground-hint">화면 아무 곳이나 클릭해보세요.<br>이번엔 depth2가 depth1보다<br>훨씬 긴 케이스예요.</div>
-
-  <div class="trigger-marker"></div>
-
-  <div class="sheet stack-base">
-    <div class="sheet-view">
-      <div class="sheet-list">
-        <div class="list-item js-open-submenu" data-val="menu1">
-          <span class="item-label">메뉴</span>
-          <svg class="item-arrow" viewBox="0 0 24 24" fill="none">
-            <path d="M9 5l7 7-7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item js-open-submenu" data-val="menu2">
-          <span class="item-label">메뉴</span>
-          <svg class="item-arrow" viewBox="0 0 24 24" fill="none">
-            <path d="M9 5l7 7-7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="list-item" data-val="menu3">
-          <span class="item-label">메뉴</span>
-        </div>
-        <div class="list-item" data-val="menu4">
-          <span class="item-label">메뉴</span>
-        </div>
-      </div>
-    </div>
-    <div class="stack-dim"></div>
-  </div>
-
-  <div class="stack-top">
-    <div class="sheet-hd">
-      <button class="back-btn js-back" aria-label="뒤로가기">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M15 5l-7 7 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <span class="sheet-title">메뉴</span>
-    </div>
-    <div class="sheet-list">
-      <div class="list-item" data-val="sub1"><span class="item-label">메뉴</span></div>
-      <div class="list-item" data-val="sub2"><span class="item-label">메뉴</span></div>
-      <div class="list-item" data-val="sub3"><span class="item-label">메뉴</span></div>
-      <div class="list-item" data-val="sub4"><span class="item-label">메뉴</span></div>
-      <div class="list-item" data-val="sub5"><span class="item-label">메뉴</span></div>
-      <div class="list-item" data-val="sub6"><span class="item-label">메뉴</span></div>
-    </div>
-  </div>
-
-</div><!-- .player -->
-
-<!-- ══════════════════════════════════════════ -->
-<!-- PLAYER 5: 메뉴 리스트 + 플레이그라운드 (top 정렬 우선, Safe Area에 닿으면 카드 전체를 밀어올림) -->
-<!-- ══════════════════════════════════════════ -->
-<div class="player player--playground player--menu-stack player--menu-clip">
-
-  <img class="player-bg-img" src="Img/player-bg.png" alt="">
-
-  <div class="playground-hint">화면 아무 곳이나 클릭해보세요.<br>이번엔 top 정렬을 우선 시도하고,<br>Safe Area에 닿으면 카드 전체가 위로 밀려요.</div>
+  <div class="playground-hint">화면 아무 곳이나 클릭해보세요.<br>시트가 뜨면, 화살표 있는 메뉴를<br>눌러 depth2로 들어가보세요.</div>
 
   <div class="trigger-marker"></div>
 
@@ -753,329 +300,6 @@ body {
 (function () {
   'use strict';
 
-  function initPlayer(player) {
-    const trigger      = player.querySelector('.cc-trigger');
-    const sheet        = player.querySelector('.sheet');
-    const viewLang     = player.querySelectorAll('.sheet-view')[0];
-    const viewSettings = player.querySelectorAll('.sheet-view')[1];
-    const openSettBtn  = player.querySelector('.js-open-settings');
-    const backBtn      = player.querySelector('.js-back');
-    const subtitleList = player.querySelector('.sheet-list');
-    const fixedHeight   = player.classList.contains('player--fixed-height');
-
-    let isOpen = false;
-
-    function setHeight(view) {
-      sheet.style.height = view.scrollHeight + 'px';
-    }
-
-    // 시트가 항상 실제 높이를 갖도록 초기화 (열림 애니메이션은 clip-path가 담당)
-    sheet.classList.add('no-transition');
-    setHeight(viewLang);
-    void sheet.offsetWidth;
-    sheet.classList.remove('no-transition');
-
-    function open() {
-      viewLang.classList.remove('hidden');
-      viewSettings.classList.add('hidden');
-      sheet.classList.add('no-transition');
-      setHeight(viewLang);
-      void sheet.offsetWidth;
-      sheet.classList.remove('no-transition');
-      requestAnimationFrame(function () {
-        sheet.classList.add('open');
-      });
-      isOpen = true;
-    }
-
-    function close() {
-      sheet.classList.remove('open');
-      isOpen = false;
-    }
-
-    function goTo(nextView, currentView) {
-      // nextView를 opacity 0 상태로 미리 표시하고, 컨테이너 높이를 목표값으로 전환 시작
-      nextView.classList.add('fading');
-      nextView.classList.remove('hidden');
-      // fixedHeight 인스턴스는 depth가 바뀌어도 시트 높이를 그대로 유지 (Figma 스펙: depth2도 520px)
-      if (!fixedHeight) setHeight(nextView);
-      // force reflow so the browser registers the starting (opacity 0) state
-      void nextView.offsetWidth;
-
-      requestAnimationFrame(function () {
-        // 높이 변화와 같은 타이밍으로 크로스페이드 동시 진행
-        currentView.classList.add('fading');
-        nextView.classList.remove('fading');
-      });
-
-      // 전환이 끝난 뒤 이전 화면 정리
-      setTimeout(function () {
-        currentView.classList.add('hidden');
-        currentView.classList.remove('fading');
-      }, 340);
-    }
-
-    trigger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (isOpen) { close(); } else { open(); }
-    });
-
-    openSettBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goTo(viewSettings, viewLang);
-    });
-
-    backBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goTo(viewLang, viewSettings);
-    });
-
-    subtitleList.addEventListener('click', function (e) {
-      const item = e.target.closest('.list-item');
-      if (!item) return;
-      subtitleList.querySelectorAll('.list-item').forEach(function (el) {
-        el.classList.remove('selected');
-      });
-      item.classList.add('selected');
-      e.stopPropagation();
-    });
-
-    sheet.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    player.addEventListener('click', function () {
-      if (isOpen) close();
-    });
-  }
-
-  function initStackPlayer(player) {
-    const trigger   = player.querySelector('.cc-trigger');
-    const base      = player.querySelector('.stack-base');
-    const baseView  = player.querySelector('.stack-base .sheet-view');
-    const dim       = player.querySelector('.stack-dim');
-    const top       = player.querySelector('.stack-top');
-    const openSettBtn  = player.querySelector('.js-open-settings');
-    const backBtn      = player.querySelector('.js-back');
-    const subtitleList = player.querySelector('.sheet-list');
-
-    let isOpen  = false;
-    let isDepth2 = false;
-
-    // 기존 카드가 항상 실제 높이를 갖도록 초기화 (열림 애니메이션은 clip-path가 담당)
-    base.classList.add('no-transition');
-    base.style.height = baseView.scrollHeight + 'px';
-    void base.offsetWidth;
-    base.classList.remove('no-transition');
-
-    function open() {
-      requestAnimationFrame(function () {
-        base.classList.add('open');
-      });
-      isOpen = true;
-    }
-
-    function close() {
-      base.classList.remove('open');
-      base.classList.remove('pushed');
-      dim.classList.remove('show');
-      top.classList.remove('show');
-      isOpen = false;
-      isDepth2 = false;
-    }
-
-    function goToSettings() {
-      base.classList.add('pushed');
-      dim.classList.add('show');
-      top.classList.add('show');
-      isDepth2 = true;
-    }
-
-    function goBack() {
-      base.classList.remove('pushed');
-      dim.classList.remove('show');
-      top.classList.remove('show');
-      isDepth2 = false;
-    }
-
-    trigger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (isOpen) { close(); } else { open(); }
-    });
-
-    openSettBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goToSettings();
-    });
-
-    backBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goBack();
-    });
-
-    subtitleList.addEventListener('click', function (e) {
-      const item = e.target.closest('.list-item');
-      if (!item) return;
-      subtitleList.querySelectorAll('.list-item').forEach(function (el) {
-        el.classList.remove('selected');
-      });
-      item.classList.add('selected');
-      e.stopPropagation();
-    });
-
-    base.addEventListener('click', function (e) { e.stopPropagation(); });
-    top.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    player.addEventListener('click', function () {
-      if (isOpen) close();
-    });
-  }
-
-  function initPlaygroundPlayer(player) {
-    const sheet        = player.querySelector('.sheet');
-    const viewLang      = player.querySelectorAll('.sheet-view')[0];
-    const viewSettings  = player.querySelectorAll('.sheet-view')[1];
-    const openSettBtn   = player.querySelector('.js-open-settings');
-    const backBtn        = player.querySelector('.js-back');
-    const subtitleList  = player.querySelector('.sheet-list');
-    const hint          = player.querySelector('.playground-hint');
-    const marker        = player.querySelector('.trigger-marker');
-
-    const FRAME_W = 390, FRAME_H = 844;
-    const SHEET_W = 260, GAP = 8, MARGIN = 16;
-
-    let isOpen = false;
-    let anchor = null; // { h: 'right'|'left', v: 'down'|'up' } — 시트가 트리거 기준 어느 방향으로 자라는지
-
-    // 트리거와 가까운(고정된) 모서리로 수렴하는 clip-path 계산
-    function closedClip() {
-      const vertKey  = anchor.v === 'down' ? 'top' : 'bottom';   // 고정된 세로 변
-      const horizKey = anchor.h === 'right' ? 'left' : 'right';  // 고정된 가로 변
-      const map = {
-        'top-left':     'inset(0% 100% 100% 0% round 20px)',
-        'top-right':    'inset(0% 0% 100% 100% round 20px)',
-        'bottom-left':  'inset(100% 100% 0% 0% round 20px)',
-        'bottom-right': 'inset(100% 0% 0% 100% round 20px)'
-      };
-      return map[vertKey + '-' + horizKey];
-    }
-
-    // depth 전환 등으로 높이가 바뀔 때, 고정되어야 할 변(top 또는 bottom)을 유지하며 재계산
-    function applyHeight(newHeight) {
-      if (anchor.v === 'up') {
-        const fixedBottom = anchor.top + anchor.height;
-        anchor.top = fixedBottom - newHeight;
-        sheet.style.top = anchor.top + 'px';
-      }
-      anchor.height = newHeight;
-      sheet.style.height = newHeight + 'px';
-    }
-
-    function place(x, y) {
-      viewLang.classList.remove('hidden');
-      viewSettings.classList.add('hidden');
-
-      const h = x < FRAME_W / 2 ? 'right' : 'left'; // 트리거보다 오른쪽으로 열림 / 왼쪽으로 열림
-      const v = y < FRAME_H / 2 ? 'down' : 'up';    // 트리거보다 아래로 열림 / 위로 열림
-      const height = viewLang.scrollHeight;
-
-      let left;
-      if (h === 'right') {
-        left = x + GAP;
-      } else {
-        left = x - GAP - SHEET_W;
-      }
-      left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
-
-      let top;
-      if (v === 'down') {
-        top = y + GAP;
-        top = Math.min(top, FRAME_H - MARGIN - height);
-      } else {
-        top = y - GAP - height;
-        top = Math.max(top, MARGIN);
-      }
-
-      anchor = { h: h, v: v, top: top, left: left, height: height };
-
-      marker.style.left = x + 'px';
-      marker.style.top = y + 'px';
-      marker.classList.add('show');
-      hint.classList.add('hide');
-
-      sheet.classList.add('no-transition');
-      sheet.style.left = left + 'px';
-      sheet.style.top = top + 'px';
-      sheet.style.bottom = 'auto';
-      sheet.style.height = height + 'px';
-      sheet.style.clipPath = closedClip();
-      sheet.style.opacity = '0';
-      void sheet.offsetWidth;
-      sheet.classList.remove('no-transition');
-
-      requestAnimationFrame(function () {
-        sheet.style.clipPath = 'inset(0% 0% 0% 0% round 20px)';
-        sheet.style.opacity = '1';
-        sheet.style.pointerEvents = 'auto';
-      });
-
-      isOpen = true;
-    }
-
-    function close() {
-      if (!anchor) return;
-      sheet.style.clipPath = closedClip();
-      sheet.style.opacity = '0';
-      sheet.style.pointerEvents = 'none';
-      marker.classList.remove('show');
-      isOpen = false;
-    }
-
-    function goTo(nextView, currentView) {
-      nextView.classList.add('fading');
-      nextView.classList.remove('hidden');
-      applyHeight(nextView.scrollHeight);
-      void nextView.offsetWidth;
-
-      requestAnimationFrame(function () {
-        currentView.classList.add('fading');
-        nextView.classList.remove('fading');
-      });
-
-      setTimeout(function () {
-        currentView.classList.add('hidden');
-        currentView.classList.remove('fading');
-      }, 340);
-    }
-
-    openSettBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goTo(viewSettings, viewLang);
-    });
-
-    backBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      goTo(viewLang, viewSettings);
-    });
-
-    subtitleList.addEventListener('click', function (e) {
-      const item = e.target.closest('.list-item');
-      if (!item) return;
-      subtitleList.querySelectorAll('.list-item').forEach(function (el) {
-        el.classList.remove('selected');
-      });
-      item.classList.add('selected');
-      e.stopPropagation();
-    });
-
-    sheet.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    player.addEventListener('click', function (e) {
-      const rect = player.getBoundingClientRect();
-      const x = (e.clientX - rect.left) * (FRAME_W / rect.width);
-      const y = (e.clientY - rect.top) * (FRAME_H / rect.height);
-      place(x, y);
-    });
-  }
-
   function initMenuStackPlayer(player) {
     const base       = player.querySelector('.stack-base');
     const baseView   = player.querySelector('.stack-base .sheet-view');
@@ -1089,7 +313,6 @@ body {
     const FRAME_W = 390, FRAME_H = 844;
     const SHEET_W = 260, GAP = 8, MARGIN = 16;
     const PUSH_SCALE = 0.95; // .stack-base.pushed의 transform: scale(0.95)와 일치해야 함
-    const clipMode = player.classList.contains('player--menu-clip');
 
     let isOpen  = false;
     let isSub   = false;
@@ -1178,9 +401,8 @@ body {
       const playerRect = player.getBoundingClientRect();
       const itemRect = itemEl.getBoundingClientRect();
       const itemTopBefore = itemRect.top - playerRect.top;
-      const itemBottomBefore = itemRect.bottom - playerRect.top;
 
-      // base 카드는 곧 scale(0.95)로 축소되므로, 그 축소가 끝난 뒤 이 아이템의 top/bottom이
+      // base 카드는 곧 scale(0.95)로 축소되므로, 그 축소가 끝난 뒤 이 아이템의 top이
       // 실제로 위치할 지점을 anchor 모서리 기준으로 미리 계산 (고정된 변은 그대로,
       // 반대쪽으로 갈수록 PUSH_SCALE 비율만큼 앵커 쪽으로 당겨짐)
       const vertKeyBase = cornerKeys(anchor.h, anchor.v).vertKey;
@@ -1192,7 +414,6 @@ body {
         return baseBottom - PUSH_SCALE * (baseBottom - valueBefore);
       }
       const itemTop = afterShrink(itemTopBefore);
-      const itemBottom = afterShrink(itemBottomBefore);
 
       // 기존 카드 축소 + dim
       base.classList.add('pushed');
@@ -1203,49 +424,22 @@ body {
       top.style.height = 'auto';
       const topHeight = top.scrollHeight;
 
-      // 위치: base와 같은 좌/폭.
-      // 1) 아래로 펼칠 공간이 있으면 클릭한 Item/Content의 top에 맞춰 아래로 펼침
-      // 2) 공간이 부족하면, 그 아이템의 bottom에 맞춰 위로 펼침 (여전히 그 아이템 기준)
-      // 3) 그마저도 Safe Area(16px)를 넘으면 아이템 정렬은 포기하고 depth1과 같은 방향으로
-      //    앵커링해서 depth1과 12px만 띄워 살짝 보이게 하고 반대쪽 Safe Area까지 채움
+      // 위치: base와 같은 좌/폭. Item Top 정렬을 우선 시도하되, 하단 Safe Area(16px)를
+      // 넘는 경우엔 정렬 기준을 포기하고 카드 전체를(높이 그대로, 잘리거나 스크롤 없이)
+      // 위로 밀어올려서 하단이 Safe Area에 딱 맞게 노출시킴
       const spaceBelow = FRAME_H - MARGIN - itemTop;
-      let topPos, vertKey, appliedHeight;
-      if (clipMode) {
-        // Item Top 정렬을 우선 시도하되, 그러면 하단 Safe Area(16px)를 넘는 경우엔
-        // 정렬 기준을 포기하고 카드 전체를(높이 그대로, 잘리거나 스크롤 없이) 위로 밀어
-        // 올려서 하단이 Safe Area에 딱 맞게 노출시킴
-        if (topHeight <= spaceBelow) {
-          topPos = itemTop;
-        } else {
-          topPos = Math.max(MARGIN, FRAME_H - MARGIN - topHeight);
-        }
-        vertKey = 'top';
-        appliedHeight = topHeight;
-      } else if (topHeight <= spaceBelow) {
+      let topPos;
+      if (topHeight <= spaceBelow) {
         topPos = itemTop;
-        vertKey = 'top';
-        appliedHeight = topHeight;
-      } else if (itemBottom - topHeight >= MARGIN) {
-        topPos = itemBottom - topHeight;
-        vertKey = 'bottom';
-        appliedHeight = topHeight;
       } else {
-        vertKey = vertKeyBase; // depth1이 고정된 변과 동일하게 맞춤
-        appliedHeight = topHeight;
-        if (vertKeyBase === 'bottom') {
-          const baseBottomEdge = anchor.top + anchor.height; // depth1의 고정된(안 움직이는) 하단
-          topPos = Math.max(MARGIN, baseBottomEdge - 12 - topHeight);
-        } else {
-          const baseTopEdge = anchor.top; // depth1의 고정된(안 움직이는) 상단
-          topPos = Math.min(baseTopEdge + 12, FRAME_H - MARGIN - topHeight);
-        }
+        topPos = Math.max(MARGIN, FRAME_H - MARGIN - topHeight);
       }
 
       top.style.left = anchor.left + 'px';
       top.style.top = topPos + 'px';
       top.style.bottom = 'auto';
-      top.style.height = appliedHeight + 'px';
-      top.style.transformOrigin = vertKey + ' ' + cornerKeys(anchor.h, anchor.v).horizKey;
+      top.style.height = topHeight + 'px';
+      top.style.transformOrigin = 'top ' + cornerKeys(anchor.h, anchor.v).horizKey;
       top.style.transform = 'scale(0.96)';
       void top.offsetWidth;
       top.classList.remove('no-transition');
@@ -1284,17 +478,7 @@ body {
     });
   }
 
-  document.querySelectorAll('.player').forEach(function (player) {
-    if (player.classList.contains('player--menu-stack')) {
-      initMenuStackPlayer(player);
-    } else if (player.classList.contains('player--stack')) {
-      initStackPlayer(player);
-    } else if (player.classList.contains('player--playground')) {
-      initPlaygroundPlayer(player);
-    } else {
-      initPlayer(player);
-    }
-  });
+  document.querySelectorAll('.player').forEach(initMenuStackPlayer);
 
 })();
 </script>
