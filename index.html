@@ -359,9 +359,9 @@ html, body {
         left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
 
         if (v === 'down') {
-          topPx = Math.min(y, FRAME_H - MARGIN - height);
+          topPx = Math.max(MARGIN, Math.min(y, FRAME_H - MARGIN - height));
         } else {
-          topPx = Math.max(y - height, MARGIN);
+          topPx = Math.min(Math.max(y - height, MARGIN), FRAME_H - MARGIN - height);
         }
       } else {
         // 2순위 fallback: 가로 양쪽 다 자리가 없을 때만 세로로 쌓임
