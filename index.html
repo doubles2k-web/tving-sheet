@@ -335,18 +335,44 @@ html, body {
     }
 
     function place(x, y) {
-      const h = x < FRAME_W / 2 ? 'right' : 'left';
-      const v = y < FRAME_H / 2 ? 'down' : 'up';
       const height = baseView.scrollHeight;
 
-      let left = h === 'right' ? x + GAP : x - GAP - SHEET_W;
-      left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
+      // 1순위: 가로 배치 — 트리거 좌/우 절반 기준으로 방향을 정하고, 그 방향에
+      // 자리가 있는지 확인. 자리가 없으면 반대쪽을 시도.
+      const preferRight = x < FRAME_W / 2;
+      const fitsRight = (FRAME_W - x - GAP - MARGIN) >= SHEET_W;
+      const fitsLeft  = (x - GAP - MARGIN) >= SHEET_W;
 
-      let topPx;
-      if (v === 'down') {
-        topPx = Math.min(y + GAP, FRAME_H - MARGIN - height);
+      let h = null;
+      if (preferRight && fitsRight) h = 'right';
+      else if (!preferRight && fitsLeft) h = 'left';
+      else if (fitsRight) h = 'right';
+      else if (fitsLeft) h = 'left';
+
+      const v = y < FRAME_H / 2 ? 'down' : 'up';
+      let left, topPx;
+
+      if (h) {
+        // 가로에 자리가 있는 경우: 트리거 끝에서 8px 띄우고(가로만 간격),
+        // 세로는 간격 없이 트리거 위치에 맞춰 정렬한 뒤 남는 방향으로 자람
+        left = h === 'right' ? x + GAP : x - GAP - SHEET_W;
+        left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
+
+        if (v === 'down') {
+          topPx = Math.min(y, FRAME_H - MARGIN - height);
+        } else {
+          topPx = Math.max(y - height, MARGIN);
+        }
       } else {
-        topPx = Math.max(y - GAP - height, MARGIN);
+        // 2순위 fallback: 가로 양쪽 다 자리가 없을 때만 세로로 쌓임
+        // (트리거 위/아래 8px 간격, 가로는 간격 없이 트리거 위치에 맞춰 정렬)
+        if (v === 'down') {
+          topPx = Math.min(y + GAP, FRAME_H - MARGIN - height);
+        } else {
+          topPx = Math.max(y - GAP - height, MARGIN);
+        }
+        left = Math.max(MARGIN, Math.min(x - SHEET_W / 2, FRAME_W - SHEET_W - MARGIN));
+        h = x < FRAME_W / 2 ? 'right' : 'left';
       }
 
       anchor = { h: h, v: v, left: left, top: topPx, height: height };
