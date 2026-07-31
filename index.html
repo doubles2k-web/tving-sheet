@@ -313,6 +313,7 @@ html, body {
 
     const FRAME_W = 390, FRAME_H = 844;
     const SHEET_W = 260, GAP = 8, MARGIN = 16;
+    const MARKER_R = 7; // .trigger-marker 반지름(14px 지름의 절반) — 트리거를 영역으로 취급할 때 사용
     const PUSH_SCALE = 0.95; // .stack-base.pushed의 transform: scale(0.95)와 일치해야 함
 
     let isOpen  = false;
@@ -336,12 +337,15 @@ html, body {
 
     function place(x, y) {
       const height = baseView.scrollHeight;
+      // 트리거는 점이 아니라 실제 영역(반지름 MARKER_R짜리 원)으로 취급 —
+      // 모든 간격은 이 영역의 가장자리에서부터 잰다
+      const R = MARKER_R;
 
       // 1순위: 가로 배치 — 트리거 좌/우 절반 기준으로 방향을 정하고, 그 방향에
       // 자리가 있는지 확인. 자리가 없으면 반대쪽을 시도.
       const preferRight = x < FRAME_W / 2;
-      const fitsRight = (FRAME_W - x - GAP - MARGIN) >= SHEET_W;
-      const fitsLeft  = (x - GAP - MARGIN) >= SHEET_W;
+      const fitsRight = (FRAME_W - (x + R) - GAP - MARGIN) >= SHEET_W;
+      const fitsLeft  = ((x - R) - GAP - MARGIN) >= SHEET_W;
 
       let h = null;
       if (preferRight && fitsRight) h = 'right';
@@ -353,22 +357,22 @@ html, body {
       let left, topPx;
 
       if (h) {
-        // 가로에 자리가 있는 경우: 트리거 끝에서 8px 띄움 (가로/세로 모두 8px 간격)
-        left = h === 'right' ? x + GAP : x - GAP - SHEET_W;
+        // 가로에 자리가 있는 경우: 트리거 영역 가장자리에서 8px 띄움 (가로/세로 모두)
+        left = h === 'right' ? (x + R + GAP) : (x - R - GAP - SHEET_W);
         left = Math.max(MARGIN, Math.min(left, FRAME_W - SHEET_W - MARGIN));
 
         if (v === 'down') {
-          topPx = Math.max(MARGIN, Math.min(y + GAP, FRAME_H - MARGIN - height));
+          topPx = Math.max(MARGIN, Math.min(y + R + GAP, FRAME_H - MARGIN - height));
         } else {
-          topPx = Math.min(Math.max(y - GAP - height, MARGIN), FRAME_H - MARGIN - height);
+          topPx = Math.min(Math.max(y - R - GAP - height, MARGIN), FRAME_H - MARGIN - height);
         }
       } else {
         // 2순위 fallback: 가로 양쪽 다 자리가 없을 때만 세로로 쌓임
-        // (트리거 위/아래 8px 간격, 가로는 간격 없이 트리거 위치에 맞춰 정렬)
+        // (트리거 영역 위/아래로 8px 간격, 가로는 간격 없이 트리거 위치에 맞춰 정렬)
         if (v === 'down') {
-          topPx = Math.min(y + GAP, FRAME_H - MARGIN - height);
+          topPx = Math.min(y + R + GAP, FRAME_H - MARGIN - height);
         } else {
-          topPx = Math.max(y - GAP - height, MARGIN);
+          topPx = Math.max(y - R - GAP - height, MARGIN);
         }
         left = Math.max(MARGIN, Math.min(x - SHEET_W / 2, FRAME_W - SHEET_W - MARGIN));
         h = x < FRAME_W / 2 ? 'right' : 'left';
