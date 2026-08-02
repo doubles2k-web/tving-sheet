@@ -371,14 +371,17 @@ html, body {
 
       if (!h) {
         // 2순위 fallback: 가로 배치가 불가능하거나(양쪽 다 공간 없음) 세로 정렬이
-        // Safe Area를 침범할 때만 여기로 옴 — 트리거 박스 위/아래 8px 간격의 세로 스택
+        // Safe Area를 침범할 때만 여기로 옴 — 트리거 박스 위/아래 8px 간격의 세로 스택.
+        // 가로 위치는 트리거를 중심으로 정렬하는 게 아니라, 여백이 더 넓은 쪽의
+        // Safe Area(16px)에 붙인다 — preferRight(트리거가 왼쪽 절반)면 오른쪽 Safe
+        // Area, 아니면 왼쪽 Safe Area.
         if (v === 'down') {
           topPx = Math.min(y + TRIGGER_SIZE + GAP, FRAME_H - MARGIN - height);
         } else {
           topPx = Math.max(y - GAP - height, MARGIN);
         }
-        left = Math.max(MARGIN, Math.min(x + TRIGGER_SIZE / 2 - SHEET_W / 2, FRAME_W - SHEET_W - MARGIN));
-        h = x < FRAME_W / 2 ? 'right' : 'left';
+        left = preferRight ? (FRAME_W - SHEET_W - MARGIN) : MARGIN;
+        h = preferRight ? 'right' : 'left';
       }
 
       anchor = { h: h, v: v, left: left, top: topPx, height: height };
