@@ -372,15 +372,17 @@ html, body {
       if (!h) {
         // 2순위 fallback: 가로 배치가 불가능하거나(양쪽 다 공간 없음) 세로 정렬이
         // Safe Area를 침범할 때만 여기로 옴 — 트리거 박스 위/아래 8px 간격의 세로 스택.
-        // 가로 위치는 트리거를 중심으로 정렬하는 게 아니라, 여백이 더 넓은 쪽의
-        // Safe Area(16px)에 붙인다 — preferRight(트리거가 왼쪽 절반)면 오른쪽 Safe
-        // Area, 아니면 왼쪽 Safe Area.
+        // 가로 위치는 트리거 중심이나 고정 Safe Area가 아니라, 원래 시도했던 방향의
+        // 트리거 가장자리에 맞춘다 — preferRight(트리거가 왼쪽 절반, h='right' 시도)면
+        // 트리거 좌측 가장자리(x)에, 아니면 트리거 우측 가장자리(x+TRIGGER_SIZE)에 맞춤.
+        // 단, Safe Area(16px)는 넘지 않도록 clamp.
         if (v === 'down') {
           topPx = Math.min(y + TRIGGER_SIZE + GAP, FRAME_H - MARGIN - height);
         } else {
           topPx = Math.max(y - GAP - height, MARGIN);
         }
-        left = preferRight ? (FRAME_W - SHEET_W - MARGIN) : MARGIN;
+        const rawLeft = preferRight ? x : (x + TRIGGER_SIZE - SHEET_W);
+        left = Math.max(MARGIN, Math.min(rawLeft, FRAME_W - SHEET_W - MARGIN));
         h = preferRight ? 'right' : 'left';
       }
 
